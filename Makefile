@@ -3,13 +3,13 @@
 # The only one that needs changing is the assembler 
 # rule, as we use nasm instead of GNU as.
 
-SOURCES=kernel.c boot.asm common.c
+SOURCES=boot.asm kernel.c common.c Moniter.c
 OBJ=$(patsubst %.c,obj/%.o,$(filter %.c, $(SOURCES)))
 OBJ+=$(patsubst %.asm,obj/%.o,$(filter %.asm, $(SOURCES)))
 
-CFLAGS=-m32 -c -nostdlib -nostdinc -fno-builtin -fno-stack-protector
-LDFLAGS=-m elf_i386 -T link.ld
-ASFLAGS=-f elf32
+CFLAGS=-c -std=gnu99 -ffreestanding -O2 -Wall -Wextra
+LDFLAGS=-ffreestanding -O2 -nostdlib -T link.ld -lgcc
+ASFLAGS=-felf
 
 all: $(SOURCES) link
 	$()
@@ -18,10 +18,10 @@ clean:
 	-rm obj/*.o bin/kernel
 
 link:
-	ld $(LDFLAGS) -o bin/kernel $(OBJ)
+	i686-elf-gcc $(LDFLAGS) -o bin/kernel $(OBJ)
 
 %.c: $(@:%.c=.h)
-	gcc $(CFLAGS) src/$@ -o obj/$(@:%.c=%.o)
+	i686-elf-gcc $(CFLAGS) src/$@ -o obj/$(@:%.c=%.o)
 
 %.asm:
 	nasm $(ASFLAGS) src/$@ -o obj/$(@:%.asm=%.o)

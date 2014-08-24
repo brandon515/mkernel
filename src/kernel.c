@@ -1,39 +1,26 @@
-/*
-* Copyright (C) 2014  Arjun Sreedharan
-* License: GPL version 2 or higher http://www.gnu.org/licenses/gpl.html
-*/
+
+/* Check if the compiler thinks if we are targeting the wrong operating system. */
+#include "kernel.h"
+#if defined(__linux__)
+#error "You are not using a cross-compiler, you will most certainly run into trouble"
+#endif
+ 
+/* This tutorial will only work for the 32-bit ix86 targets. */
+#if !defined(__i386__)
+#error "This tutorial needs to be compiled with a ix86-elf compiler"
+#endif
 
 void kmain(void)
 {
-	char *str = "my first kernel hello!!";
-	// video memory begins at address 0xb8000
-	char *vidptr = (char*)0xb8000;
-	unsigned int i = 0;
-	unsigned int j = 0;
-	unsigned int screensize;
+	char *str = "my first kernel";
 
-	// this loops clears the screen
-	// there are 25 lines each of 80 columns; each element takes 2 bytes
-	screensize = 80 * 25 * 2;
-	while (j < screensize) {
-		// blank character
-		vidptr[j] = ' ';
-		// attribute-byte
-		vidptr[j+1] = 0x50; 
-		j = j + 2;
-	}
+	Cursor cur;
+	cur.x = 20;
+	cur.y = 0;
+	uint8_t color = getColor(COLOR_WHITE, COLOR_RED);
 
-	j = 0;
-
-	// this loop writes the string to video memory
-	while (str[j] != '\0') {
-		// the character's ascii
-		vidptr[i] = str[j];
-		// attribute-byte: give character black bg and light grey fg
-		vidptr[i+1] = 0x57;
-		++j;
-		i = i + 2;
-	}
+	moniterClear(color);
+	writeString(str, color, &cur);
 	
 	return;
 }
