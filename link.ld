@@ -1,6 +1,6 @@
 /* The bootloader will look at this image and start execution at the symbol
    designated as the entry point. */
-ENTRY(start)
+ENTRY(loader)
 
 /* Tell where the various sections of the object files will be put in the final
    kernel image. */
@@ -35,7 +35,6 @@ SECTIONS
   .bss BLOCK(4K) : ALIGN(4K)
   {
     *(COMMON)
-    *(.bootstrap_stack)
     *(.bss)
   }
 
