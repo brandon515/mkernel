@@ -1,17 +1,18 @@
-CROSSCOM=/home/theman515/opt/cross/bin/i686-elf-gcc
-SOURCES=loader.asm
+CROSSCCOM=/home/theman515/opt/cross/bin/i686-elf-gcc
+CROSSACOM=/home/theman515/opt/cross/bin/i686-elf-as
+SOURCES=loader.asm io.asm monitor.c kmain.c kstring.c serial.c interrupt_handler.c descriptor_tables.c interrupt.asm printf.c memset.c memmove.c memcmp.c memcpy.c print_registers_c.c paging.c
 OBJ=$(patsubst %.c,obj/%.o,$(filter %.c, $(SOURCES)))
 OBJ+=$(patsubst %.asm,obj/%.o,$(filter %.asm, $(SOURCES)))
 
 CFLAGS=-c -std=gnu99 -ffreestanding -O2 -Wall -Wextra
 LDFLAGS=-ffreestanding -O2 -nostdlib -T link.ld -lgcc
-ASFLAGS=-felf
+ASFLAGS=
 
 all: $(SOURCES) link copy generate
 	$()
 
 copy:
-	mv bin/kernel.elf iso/boot
+	cp -rf bin/kernel.elf iso/boot
 
 generate:
 	    genisoimage -R                              \
@@ -22,19 +23,19 @@ generate:
 					-input-charset utf8             \
 					-quiet                          \
 					-boot-info-table                \
-					-o MyOs.iso                     \
+					-o bin/MyOs.iso                 \
 					iso
 clean:
-	-rm obj/*.o bin/kernel
+	rm obj/*.o bin/*
 
 link:
-	$(CROSSCOM) $(LDFLAGS) -o bin/kernel.elf $(OBJ)
+	$(CROSSCCOM) $(LDFLAGS) -o bin/kernel.elf $(OBJ) 
 
 %.c: $(@:%.c=.h)
-	$(CROSSCOM) $(CFLAGS) src/$@ -o obj/$(@:%.c=%.o)
+	$(CROSSCCOM) $(CFLAGS) src/$@ -o obj/$(@:%.c=%.o)
 
 %.asm:
-	nasm $(ASFLAGS) src/$@ -o obj/$(@:%.asm=%.o)
+	$(CROSSACOM) $(ASFLAGS) src/$@ -o obj/$(@:%.asm=%.o)
 
-run: bin/kernel
-	bochs -f bochsrc.txt -q
+run:
+	qemu-system-x86_64 -d int,cpu_reset -monitor stdio -serial file:serial.out -cdrom bin/MyOs.iso

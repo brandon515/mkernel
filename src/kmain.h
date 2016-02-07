@@ -1,0 +1,7 @@
+#include "monitor.h"
+#include "serial.h"
+#include "kstring.h"
+#include "descriptor_tables.h"
+#include "printf.h"
+#include "io.h"
+#include "paging.h"
